@@ -137,7 +137,7 @@ function renderSolution(product, meta = {}) {
 <style>${STYLE(t)}</style></head><body id="top"><div class="bgfx"></div>
 
 <nav class="nav"><div class="wrap">
-  <span class="present"><strong style="color:#fff;font-size:15px;letter-spacing:-.01em">${esc(PUBLISHER.name)}</strong> &middot; ${esc(PUBLISHER.role)}</span>
+  <span class="present"><strong style="color:#fff;font-size:17px;letter-spacing:-.01em">${esc(PUBLISHER.name)}</strong></span>
   <a class="btn btn-primary" href="#start" style="padding:9px 16px;font-size:14px">More information</a>
 </div></nav>
 

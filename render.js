@@ -245,8 +245,8 @@ function renderPage(content, meta = {}) {
 <body id="top"><div class="bgfx"></div><div class="grain"></div>
 
 <nav class="nav"><div class="wrap">
-  <a href="#top" style="text-decoration:none"><span style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.02em">${escapeHtml(PUBLISHER.name)}</span><span style="display:block;font-size:11.5px;color:var(--faint);letter-spacing:.02em">${escapeHtml(PUBLISHER.role)}</span></a>
-  <a class="btn btn-primary" href="#start" style="padding:11px 18px;font-size:14px">Get an intro</a>
+  <a href="#top" style="text-decoration:none"><span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-.02em">${escapeHtml(PUBLISHER.name)}</span></a>
+  <a class="btn btn-primary" href="#start" style="padding:11px 18px;font-size:14px">More information</a>
 </div></nav>
 
 <header class="hero">
