@@ -8,6 +8,15 @@ function escapeHtml(v) {
   return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// The SUBJECT of the recommendation (who we are pointing the MSP toward).
+// The PUBLISHER of the page is NYN Impact, an independent advisor: every lead
+// and introduction comes to NYN Impact, never straight to the distributor.
+const PUBLISHER = {
+  name: 'NYN Impact',
+  role: 'Independent MSP solution reviews and introductions',
+  site: process.env.PUBLISHER_URL || 'https://nynimpact.com',
+};
+
 const BRAND = {
   name: 'Rain Networks', tagline: 'Value-added distribution for MSPs',
   logo: '/rain-logo.png', heroImg: '/hero-threat.webp', boardImg: '/backup-board.webp',
@@ -202,7 +211,7 @@ function renderPage(content, meta = {}) {
   const logo = meta.logo || BRAND.logo, heroImg = meta.heroImg || BRAND.heroImg, boardImg = meta.boardImg || BRAND.boardImg;
   const heroHref = meta.slug ? '#start' : (cta.url || '#start');
   const formAction = meta.slug ? `${prefix}/l/${encodeURIComponent(meta.slug)}` : '';
-  const ctaLabel = cta.label || 'Send me the partner details';
+  const ctaLabel = cta.label || 'Send me more information';
 
   const products = (did.products && did.products.length) ? did.products : [
     { name: 'NINJIO', layer: 'Prevent / human layer', for_you: 'Security awareness training that stops phishing and social engineering. Recurring revenue, white-label or co-brand as your own.' },
@@ -236,15 +245,15 @@ function renderPage(content, meta = {}) {
 <body id="top"><div class="bgfx"></div><div class="grain"></div>
 
 <nav class="nav"><div class="wrap">
-  <a class="logochip" href="#top"><img src="${escapeHtml(logo)}" alt="${escapeHtml(BRAND.name)}"></a>
-  <a class="btn btn-primary" href="#start" style="padding:11px 18px;font-size:14px">Get the details</a>
+  <a href="#top" style="text-decoration:none"><span style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.02em">${escapeHtml(PUBLISHER.name)}</span><span style="display:block;font-size:11.5px;color:var(--faint);letter-spacing:.02em">${escapeHtml(PUBLISHER.role)}</span></a>
+  <a class="btn btn-primary" href="#start" style="padding:11px 18px;font-size:14px">Get an intro</a>
 </div></nav>
 
 <header class="hero">
   <div class="hero-bg"><img src="${escapeHtml(heroImg)}" alt="The ransomware threat MSPs protect their clients from" loading="eager"></div>
   <div class="orb"></div>
   <div class="wrap">
-    <div class="reveal in"><span class="eyebrow"><span class="dot"></span>${escapeHtml(BRAND.name)} Partner Invitation</span></div>
+    <div class="reveal in"><span class="eyebrow"><span class="dot"></span>An introduction worth making</span></div>
     <h1 class="reveal in">${escapeHtml(hero.headline || `${company}, turn security into your next recurring revenue line`)}</h1>
     <p class="sub reveal in">${escapeHtml(hero.subhead || `${BRAND.name} helps MSPs stand up new managed-security revenue fast, resold under your own brand.`)}</p>
     <div class="cta-row reveal in"><a class="btn btn-primary" href="${escapeHtml(heroHref)}">${escapeHtml(ctaLabel)}</a><a class="btn btn-ghost" href="#stack">See the stack</a></div>
@@ -302,17 +311,17 @@ function renderPage(content, meta = {}) {
 <section><div class="wrap"><div class="proof reveal">${escapeHtml(proof.para || `${BRAND.name} is a Seattle-area value-added distributor trusted by MSPs to identify, deploy, and scale best-in-class security.`)}</div></div></section>
 
 <section><div class="wrap"><div class="ctaband reveal" id="cta-box">
-  <h2>${escapeHtml(cta.headline || `See the numbers for ${company}`)}</h2>
-  <p>${escapeHtml(cta.subhead || 'Leave your email and I will send the stack, the margins, and how onboarding works. No calendars, no obligation.')}</p>
+  <h2>Want more information?</h2>
+  <p>Leave your work email and I will send it over.</p>
   ${formAction ? `<form class="lead-form" id="start" method="post" action="${escapeHtml(formAction)}">
     <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="Your work email">
     <input type="tel" name="phone" autocomplete="tel" placeholder="Phone (optional, if you would rather I call)">
     <button type="submit">${escapeHtml(ctaLabel)}</button></form>
-    <p class="formnote">I follow up by email. Add a phone number only if you would prefer a call.</p>`
+    <p class="formnote">Phone is optional, only if you would rather I call.</p>`
     : `<a class="btn btn-primary" href="${escapeHtml(cta.url || '#')}">${escapeHtml(ctaLabel)}</a>`}
 </div></div></section>
 
-<footer><div class="wrap"><span>${escapeHtml(BRAND.name)} &middot; ${escapeHtml(BRAND.tagline)}</span><span>Guardz &middot; Macrium &middot; NINJIO and the full Rain catalog</span></div></footer>
+<footer><div class="wrap"><span>${escapeHtml(PUBLISHER.name)}</span><span>Product names and logos are trademarks of their respective owners.</span></div></footer>
 ${SCRIPT(!!formAction)}
 </body></html>`;
 }
@@ -335,7 +344,7 @@ function shell(meta, bodyInner, title) {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title><meta name="theme-color" content="#070b16"><meta name="robots" content="noindex">
 <style>${fontCss(meta)}${STYLE}</style></head><body id="top"><div class="bgfx"></div><div class="grain"></div>
-<nav class="nav"><div class="wrap"><a class="logochip" href="#top"><img src="${escapeHtml(BRAND.logo)}" alt="${escapeHtml(BRAND.name)}"></a></div></nav>
+<nav class="nav"><div class="wrap"><a href="#top" style="text-decoration:none"><span style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.02em">${escapeHtml(PUBLISHER.name)}</span></a></div></nav>
 ${bodyInner}
 <footer><div class="wrap"><span>${escapeHtml(BRAND.name)} &middot; ${escapeHtml(BRAND.tagline)}</span></div></footer></body></html>`;
 }

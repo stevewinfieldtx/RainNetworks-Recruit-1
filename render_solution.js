@@ -1,9 +1,16 @@
 // Vendor-themed SOLUTION landing pages, premium build. Each page adopts the
 // vendor's palette and feel, with a cinematic hero over a generated (Runware)
 // image, depth, motion, and real graphics. MSP-advocacy copy ("why you want
-// <product>"), presented by Rain Networks (authorized distributor). Never claims
-// to be the vendor: clear attribution + "not affiliated / not endorsed" +
-// official-site link. Zero em/en dashes.
+// <product>"), published by NYN Impact as an INDEPENDENT third party that
+// reviews solutions for MSPs and makes introductions. Never claims to be the
+// vendor: clear attribution + "independent / not affiliated" + official-site
+// link. Leads go to NYN Impact, not the vendor. Zero em/en dashes.
+
+const PUBLISHER = {
+  name: 'NYN Impact',
+  role: 'Independent MSP solution reviews and introductions',
+  site: process.env.PUBLISHER_URL || 'https://nynimpact.com',
+};
 
 function esc(v) {
   if (v === null || v === undefined) return '';
@@ -35,8 +42,8 @@ const SOLUTIONS = {
     does: ['Windows server and workstation imaging', 'Rapid clone and full image recovery', 'Instant virtualization of a backup',
       'Restore to dissimilar hardware', 'MultiSite central monitoring for MSPs', 'Encryption and ransomware protection'],
     caseTitle: 'A partner program built for the channel',
-    caseBody: 'Macrium runs a partner program that equips resellers and service providers with technical resources, materials, and margin. Through Rain Networks you get the licensing, onboarding, and enablement to stand it up fast.',
-    cta: { headline: 'Add Macrium to your stack through Rain', sub: 'Leave your email and Rain Networks will send pricing, the partner terms, and how onboarding works. No obligation.' },
+    caseBody: 'Macrium runs a partner program that equips resellers and service providers with technical resources, materials, and margin. I can introduce you to the right distributor so you get licensing, onboarding, and enablement without starting cold.',
+    cta: { headline: 'Want more information?', sub: 'Leave your work email and I will send it over.' },
   },
 };
 
@@ -115,11 +122,10 @@ function renderSolution(product, meta = {}) {
   const s = SOLUTIONS[product];
   if (!s) return null;
   const t = s.theme;
-  const rainLogo = meta.logo || '/rain-logo.png';
   const prefix = (meta.prefix || '').replace(/\/$/, '');
   const heroImg = meta.heroImg || null;
   const formAction = `${prefix}/l/sol_${encodeURIComponent(product)}`;
-  const title = `Why MSPs choose ${s.name} | via Rain Networks`;
+  const title = `Why MSPs choose ${s.name} | ${PUBLISHER.name}`;
   const desc = s.hero.subhead;
   const host = s.official.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
@@ -131,8 +137,8 @@ function renderSolution(product, meta = {}) {
 <style>${STYLE(t)}</style></head><body id="top"><div class="bgfx"></div>
 
 <nav class="nav"><div class="wrap">
-  <span class="present">Presented by <img src="${esc(rainLogo)}" alt="Rain Networks">, an authorized distributor</span>
-  <a class="btn btn-primary" href="#start" style="padding:9px 16px;font-size:14px">Talk to Rain about ${esc(s.name)}</a>
+  <span class="present"><strong style="color:#fff;font-size:15px;letter-spacing:-.01em">${esc(PUBLISHER.name)}</strong> &middot; ${esc(PUBLISHER.role)}</span>
+  <a class="btn btn-primary" href="#start" style="padding:9px 16px;font-size:14px">More information</a>
 </div></nav>
 
 <header class="hero">${heroBg(heroImg, t)}<div class="wrap">
@@ -141,7 +147,7 @@ function renderSolution(product, meta = {}) {
   <h1 class="reveal in">${esc(s.hero.headline)}</h1>
   <p class="sub reveal in">${esc(s.hero.subhead)}</p>
   <div class="row reveal in">
-    <a class="btn btn-primary" href="#start">Talk to Rain about ${esc(s.name)}</a>
+    <a class="btn btn-primary" href="#start">Send me more information</a>
     <a class="small" href="${esc(s.official)}" target="_blank" rel="noopener">Visit the official ${esc(s.name)} site</a>
   </div>
 </div></header>
@@ -168,14 +174,13 @@ function renderSolution(product, meta = {}) {
   <form class="lead-form" id="start" method="post" action="${esc(formAction)}">
     <input type="email" name="email" required autocomplete="email" placeholder="Your work email">
     <input type="tel" name="phone" autocomplete="tel" placeholder="Phone (optional)">
-    <button type="submit">Send me ${esc(s.name)} details</button>
+    <button type="submit">Send me more information</button>
   </form>
 </div></div></section>
 
 <footer><div class="wrap"><p class="disc">
-  This page is provided by <strong>Rain Networks</strong>, an authorized distributor, to explain why managed service providers choose ${esc(s.name)}.
-  ${esc(s.name)} and related names and logos are trademarks of their respective owner. This page is not affiliated with, sponsored by, or endorsed by ${esc(s.name)}.
-  For official product information, visit <a href="${esc(s.official)}" target="_blank" rel="noopener">${esc(host)}</a>.
+  <strong>${esc(PUBLISHER.name)}</strong> &middot; ${esc(s.name)} and related names and logos are trademarks of their respective owner. ${esc(PUBLISHER.name)} is not affiliated with or endorsed by ${esc(s.name)}.
+  Official product information: <a href="${esc(s.official)}" target="_blank" rel="noopener">${esc(host)}</a>.
 </p></div>
 <script>(function(){var r=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;var e=document.querySelectorAll('.reveal:not(.in)');if(r||!('IntersectionObserver'in window)){e.forEach(function(x){x.classList.add('in')});return}var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12});e.forEach(function(x){io.observe(x)})})();</script>
 </footer>

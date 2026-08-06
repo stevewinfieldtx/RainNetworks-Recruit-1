@@ -55,10 +55,10 @@ function buildStaticContent(company, enrichment = {}) {
       logos: []
     },
     cta: {
-      headline: `See the numbers for ${company}`,
-      subhead: 'Leave your email and I will send the stack, the margins, and how onboarding works. No calendars, no obligation.',
+      headline: 'Want more information?',
+      subhead: 'Leave your work email and I will send it over.',
       url: (e.cta_url || DEFAULT_CTA_URL()),
-      label: 'Send me the partner details'
+      label: 'Send me more information'
     }
   };
 }
@@ -75,7 +75,9 @@ You will be given the company's own website text. Treat it as the primary source
 
 IMPORTANT positioning: the three products are INDEPENDENT and do not have to be adopted together. The partner can keep the tools they already run and add just one, or two (for example keep their existing endpoint security and add only Macrium and NINJIO). They work well together but each stands on its own. Never imply an all-or-nothing bundle. The defense_in_depth.intro must say they layer well together AND that the partner can start with a single product or add to their current stack.
 
-The call to action is a low-friction EMAIL CAPTURE, not a booking or a phone call. The page shows an email field (required) and an optional phone field. So the cta.headline and cta.subhead must invite the reader to leave their email to receive the details. Do NOT mention booking a call, calendars, or scheduling. cta.label must be a short button phrase for sending the details.
+The call to action is a low-friction EMAIL CAPTURE, not a booking or a phone call. The page shows an email field (required) and an optional phone field. Keep the CTA SHORT and plain: cta.headline should be "Want more information?" and cta.subhead a single short line like "Leave your work email and I will send it over." Do NOT mention booking a call, calendars, or scheduling, and do NOT say the distributor or vendor will contact them. cta.label is a short button phrase such as "Send me more information".
+
+VOICE: the page is written by an independent advisor to MSPs who is recommending Rain Networks to the reader. Write about Rain Networks in the third person ("Rain Networks is a distributor that...", "you would get..."). Never write as if you ARE Rain Networks, and never use "we" to mean Rain.
 
 HARD RULES:
 - Use ONLY facts provided about the company. If a fact is unknown, stay generic. NEVER invent the company's client names, size, revenue, or specifics.
