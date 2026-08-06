@@ -87,35 +87,39 @@ async function buildPartnerPage(p) {
   return { company, domain, status: 'built', slug: s, atoms: atoms.length, url: `${PUB}${PREFIX}/${s}` };
 }
 
-// ── Runware image -> data URI (inlined; solution pages only) ─────────────────
+// ── Runware image -> data URI (inlined). Returns {dataUri, error} so failures
+// are visible instead of silently null. Per docs: POST /v1, Bearer auth, an
+// array with an imageInference task; response is { data:[{imageURL|imageBase64Data}] }.
 async function runwareImage(prompt, shape = 'wide') {
   const KEY = process.env.RUNWARE_API_KEY;
-  if (!KEY) return null;
+  if (!KEY) return { dataUri: null, error: 'RUNWARE_API_KEY not on this service' };
   const crypto = require('crypto');
   const sizes = { wide: [1344, 768], square: [1024, 1024], tall: [768, 1344] };
   const [width, height] = sizes[shape] || sizes.wide;
   const task = { taskType: 'imageInference', taskUUID: crypto.randomUUID(), positivePrompt: prompt,
-    model: process.env.RUNWARE_MODEL || 'runware:100@1', width, height, numberResults: 1, outputFormat: 'WEBP' };
+    model: process.env.RUNWARE_MODEL || 'runware:100@1', width, height, numberResults: 1 };
   try {
     const r = await fetch('https://api.runware.ai/v1', { method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KEY },
       body: JSON.stringify([task]), signal: AbortSignal.timeout(90000) });
-    const j = await r.json();
-    const img = (j.data || []).find(d => d.imageURL);
-    if (!img) return null;
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.errors) return { dataUri: null, error: `HTTP ${r.status} ${JSON.stringify(j.errors || j).slice(0, 300)}` };
+    const img = (j.data || []).find(d => d.imageURL || d.imageBase64Data);
+    if (!img) return { dataUri: null, error: 'no image in response: ' + JSON.stringify(j).slice(0, 300) };
+    if (img.imageBase64Data) return { dataUri: 'data:image/webp;base64,' + img.imageBase64Data, error: null };
     const bin = Buffer.from(await (await fetch(img.imageURL)).arrayBuffer());
-    return 'data:image/webp;base64,' + bin.toString('base64');
-  } catch { return null; }
+    return { dataUri: 'data:image/webp;base64,' + bin.toString('base64'), error: null };
+  } catch (e) { return { dataUri: null, error: e.message }; }
 }
 
 async function buildSolutionPage(product) {
   const s = SOLUTIONS[product];
   if (!s) return { status: 'error', reason: 'unknown-product' };
-  const heroImg = s.heroPrompt ? await runwareImage(s.heroPrompt, 'wide') : null;
-  const html = renderSolution(product, { prefix: PREFIX, heroImg });
+  const im = s.heroPrompt ? await runwareImage(s.heroPrompt, 'wide') : { dataUri: null, error: 'no heroPrompt' };
+  const html = renderSolution(product, { prefix: PREFIX, heroImg: im.dataUri });
   const pageSlug = 'sol_' + product;
   await db.savePage({ slug: pageSlug, company: s.name + ' (solution)', domain: null, content: { _solution: product }, html, status: 'ready' });
-  return { status: 'built', product, slug: pageSlug, url: `${PUB}${PREFIX}/s/${product}` };
+  return { status: 'built', product, slug: pageSlug, url: `${PUB}${PREFIX}/s/${product}`, image: im.dataUri ? 'generated' : ('FAILED: ' + im.error) };
 }
 
 module.exports = { tdeRecruitAtoms, buildPartnerPage, runwareImage, buildSolutionPage };
