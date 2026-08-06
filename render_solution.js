@@ -557,13 +557,25 @@ const LAYOUTS = {
 };
 
 function renderSolution(product, meta = {}) {
-  const s = SOLUTIONS[product];
-  if (!s) return null;
+  const base = SOLUTIONS[product];
+  if (!base) return null;
+  // meta.custom personalizes COPY only (headline/sub/tagline/why texts). Theme,
+  // layout, icons, the factual `does` list, cta and footer always stay base, so
+  // the model can never invent vendor capabilities.
+  const c = meta.custom || null;
+  const s = !c ? base : {
+    ...base,
+    headline: c.headline || base.headline,
+    sub: c.sub || base.sub,
+    tagline: c.tagline || base.tagline,
+    why: base.why.map((w, i) => (c.why && c.why[i])
+      ? { icon: w.icon, t: c.why[i].t || w.t, b: c.why[i].b || w.b } : w),
+  };
   const t = s.theme;
   const prefix = (meta.prefix || '').replace(/\/$/, '');
   const img = meta.heroImg || null;
-  const formAction = `${prefix}/l/sol_${encodeURIComponent(product)}`;
-  const title = `Why MSPs choose ${s.name} | ${PUBLISHER.name}`;
+  const formAction = `${prefix}/l/${encodeURIComponent(meta.leadSlug || ('sol_' + product))}`;
+  const title = meta.pageTitle || `Why MSPs choose ${s.name} | ${PUBLISHER.name}`;
   const layout = LAYOUTS[s.layout] ? s.layout : 'split';
   const css = CORE(t) + (LAYOUT_CSS[layout] ? LAYOUT_CSS[layout](t) : '');
 

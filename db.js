@@ -30,6 +30,7 @@ const DATA_DIR = path.join(__dirname, 'data');
 const PAGES_FILE = path.join(DATA_DIR, 'pages.json');
 const EVENTS_FILE = path.join(DATA_DIR, 'events.json');
 const LEADS_FILE = path.join(DATA_DIR, 'leads.json');
+const WCA_FILE = path.join(DATA_DIR, 'wca_requests.json');
 
 const IP_SALT = process.env.IP_SALT || 'rain-partners-default-salt';
 
@@ -100,6 +101,18 @@ async function initDb() {
       created_at timestamptz NOT NULL DEFAULT now()
     )`);
     await pool.query(`CREATE INDEX IF NOT EXISTS leads_slug_idx ON leads(slug)`);
+    // Self-serve WhatsCoolAbout generate requests: a URL submission is a hot
+    // interest signal even when no email is ever left.
+    await pool.query(`CREATE TABLE IF NOT EXISTS wca_requests (
+      id         bigserial PRIMARY KEY,
+      domain     text NOT NULL,
+      product    text NOT NULL,
+      slug       text,
+      ip_hash    text,
+      ua         text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS wca_requests_created_idx ON wca_requests(created_at DESC)`);
     const { rows } = await pool.query('SELECT count(*)::int AS n FROM partner_pages');
     console.log(`DB: Postgres ready (${rows[0].n} partner_pages).`);
   } catch (err) {
@@ -281,7 +294,51 @@ async function getAllPages() {
   return Object.values(readJson(PAGES_FILE, {}));
 }
 
+// --- WhatsCoolAbout self-serve pages ---------------------------------------
+
+// A visitor-generated page for this (domain, product) pair, if one exists.
+async function findWcaPage(domain, product) {
+  if (USE_PG) {
+    const { rows } = await pool.query(
+      `SELECT * FROM partner_pages WHERE domain = $1 AND content->'_wca'->>'product' = $2 LIMIT 1`,
+      [domain, product]);
+    return rows[0] || null;
+  }
+  const pages = readJson(PAGES_FILE, {});
+  return Object.values(pages).find(p => p.domain === domain &&
+    p.content && p.content._wca && p.content._wca.product === product) || null;
+}
+
+// Log a generate request (the URL submission itself is an interest signal).
+async function saveWcaRequest({ domain, product, slug, req }) {
+  const ua = req && req.headers ? (req.headers['user-agent'] || null) : null;
+  const ip = req ? (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '') : '';
+  const ipHash = hashIp((ip || '').split(',')[0].trim());
+  if (USE_PG) {
+    try {
+      await pool.query(
+        'INSERT INTO wca_requests (domain, product, slug, ip_hash, ua) VALUES ($1,$2,$3,$4,$5)',
+        [domain, product, slug || null, ipHash, ua]);
+    } catch (err) { console.error('DB: wca request write failed:', err.message); }
+  } else {
+    const reqs = readJson(WCA_FILE, []);
+    reqs.push({ domain, product, slug: slug || null, ip_hash: ipHash, ua, created_at: new Date().toISOString() });
+    writeJson(WCA_FILE, reqs);
+  }
+}
+
+async function getWcaRequests(limit = 1000) {
+  if (USE_PG) {
+    const { rows } = await pool.query(
+      'SELECT id, domain, product, slug, ip_hash, created_at FROM wca_requests ORDER BY created_at DESC LIMIT $1',
+      [limit]);
+    return rows;
+  }
+  return readJson(WCA_FILE, []).slice().reverse().slice(0, limit);
+}
+
 module.exports = {
   initDb, getPage, getAllPages, findByCompany, savePage, insertNewPage,
-  recordVisit, saveLead, getLeads, getStats, USE_PG
+  recordVisit, saveLead, getLeads, getStats,
+  findWcaPage, saveWcaRequest, getWcaRequests, USE_PG
 };

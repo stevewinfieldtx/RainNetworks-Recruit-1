@@ -152,4 +152,88 @@ async function generatePageContent(company, enrichment = {}) {
   }
 }
 
-module.exports = { generatePageContent, buildStaticContent };
+// --- WhatsCoolAbout product pitch (visitor-personalized product pages) ------
+
+// Deterministic fallback: base product copy with the company name woven in.
+// Used when no API keys, when TDE research is thin, or when the LLM fails.
+function buildStaticPitch(companyName, solution) {
+  return {
+    company: companyName,
+    headline: `Why ${solution.name} is worth ${companyName}'s attention`,
+    sub: solution.sub,
+    tagline: solution.tagline,
+    why: solution.why.map(w => ({ t: w.t, b: w.b })),
+  };
+}
+
+function pitchSystemPrompt(solution) {
+  return `You are a technology curator at NYN Impact, an independent publisher that surfaces cool technology for channel partners and IT-minded businesses. You are writing a short personalized page for ONE specific company about why ${solution.name} is genuinely cool FOR THEM.
+
+VOICE:
+- Independent reviewer. Second person ("you", "your clients") to the reader. Third person about ${solution.name} and its vendor. You are NOT the vendor and never write as the vendor.
+- Concrete, direct, no marketing fluff words like "elevate", "unleash", "seamless".
+
+SOURCES (strict):
+- The PRODUCT FACT SHEET below is the ONLY permitted source of product claims. Do not invent features, statistics, certifications, or pricing.
+- The COMPANY RESEARCH below is the ONLY permitted source of facts about the company. Identify their industry, size signals, geography, services, and stack from it. If an axis is unknown, stay generic on that axis. NEVER invent company facts (client names, revenue, headcount).
+- Every "why" item must connect a real product capability from the fact sheet to something real about this company's situation.
+
+HARD RULES:
+- Do not use em dashes or en dashes anywhere. Use commas, colons, periods, or parentheses.
+- No pricing claims of any kind.
+- Return ONLY valid JSON, no markdown fences, exactly this shape:
+{"company":"proper company name from the research, else a clean version of their domain","headline":"max 70 chars, names the company or their situation","sub":"160 to 280 chars","tagline":"max 90 chars","why":[{"t":"max 42 chars","b":"120 to 190 chars"},{"t":"...","b":"..."},{"t":"...","b":"..."},{"t":"...","b":"..."}]}
+The "why" array must contain exactly 4 items.`;
+}
+
+// Scrub em/en dashes and clamp lengths; enforce the exact shape LAYOUTS need.
+function validatePitch(parsed, companyName, solution) {
+  const clean = (v, max) => String(v || '').replace(/[—–]/g, ', ').trim().slice(0, max);
+  if (!parsed || typeof parsed !== 'object') return null;
+  if (!Array.isArray(parsed.why) || parsed.why.length !== 4) return null;
+  const why = parsed.why.map((w, i) => ({
+    t: clean(w && w.t, 42) || solution.why[i].t,
+    b: clean(w && w.b, 190) || solution.why[i].b,
+  }));
+  if (why.some(w => !w.t || !w.b)) return null;
+  const headline = clean(parsed.headline, 70);
+  const sub = clean(parsed.sub, 280);
+  if (!headline || !sub) return null;
+  return {
+    company: clean(parsed.company, 80) || companyName,
+    headline, sub,
+    tagline: clean(parsed.tagline, 90) || solution.tagline,
+    why,
+  };
+}
+
+// Personalized "why <product> for <company>" content, grounded in TDE research.
+// solution = the SOLUTIONS[product] entry; enrichment = { homepage_text } block.
+async function generateProductPitch(companyName, solution, enrichment = {}) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const modelId = process.env.OPENROUTER_MODEL_ID;
+  if (!apiKey || !modelId) return buildStaticPitch(companyName, solution);
+
+  const factSheet = {
+    name: solution.name, category: solution.category, tagline: solution.tagline,
+    headline: solution.headline, sub: solution.sub,
+    why: solution.why.map(w => ({ t: w.t, b: w.b })), does: solution.does,
+  };
+  const sys = pitchSystemPrompt(solution);
+  let user = `Company: ${companyName}\n\nPRODUCT FACT SHEET (the ONLY permitted source of product claims):\n${JSON.stringify(factSheet, null, 2)}\n\n`;
+  user += enrichment.homepage_text
+    ? `COMPANY RESEARCH (the ONLY permitted source of company facts):\n"""\n${enrichment.homepage_text}\n"""`
+    : `No company research is available. Write an honest page that personalizes only by company name; keep all other claims generic.`;
+
+  try {
+    let parsed;
+    try { parsed = await callOpenRouter(apiKey, modelId, sys, user, true); }
+    catch { parsed = await callOpenRouter(apiKey, modelId, sys, user, false); }
+    return validatePitch(parsed, companyName, solution) || buildStaticPitch(companyName, solution);
+  } catch (err) {
+    console.error(`LLM: pitch fallback for "${companyName}" x ${solution.name}: ${err.message}`);
+    return buildStaticPitch(companyName, solution);
+  }
+}
+
+module.exports = { generatePageContent, buildStaticContent, generateProductPitch, buildStaticPitch };

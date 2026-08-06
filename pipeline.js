@@ -7,7 +7,7 @@
 // Recruit lens (established earlier): template "recruit" / ChannelRevived,
 // schema {entity_role, recruit_category, signal_type, confidence_tier}.
 
-const { generatePageContent } = require('./llm');
+const { generatePageContent, generateProductPitch, buildStaticPitch } = require('./llm');
 const { renderPage } = require('./render');
 const { renderSolution, SOLUTIONS } = require('./render_solution');
 const { newSlug } = require('./slug');
@@ -122,6 +122,53 @@ async function buildSolutionPage(product) {
   return { status: 'built', product, slug: pageSlug, url: `${PUB}${PREFIX}/s/${product}`, image: im.dataUri ? 'generated' : ('FAILED: ' + im.error) };
 }
 
+// --- WhatsCoolAbout self-serve pages ---------------------------------------
+
+// "acmemsp.com" -> "Acmemsp"; "north-star-it.com" -> "North Star It".
+const prettyName = d => String(d).split('.')[0].split(/[-_]/)
+  .map(w => (w ? w[0].toUpperCase() + w.slice(1) : w)).filter(Boolean).join(' ');
+
+const wcaHero = /src="(data:image\/webp;base64,[^"]+)"/;
+
+// Build one visitor-personalized product page. Visitors ALWAYS get a page:
+// thin or failed research falls back to company-name-personalized base copy.
+// domain must already be normalized. onPhase narrates progress for the UI.
+async function buildWcaPage({ product, domain, slug: pageSlug, email, onPhase = () => {} }) {
+  const s = SOLUTIONS[product];
+  if (!s) return { status: 'error', reason: 'unknown-product' };
+
+  onPhase('research');
+  const { atoms, summary, error } = await tdeRecruitAtoms(domain, prettyName(domain));
+
+  onPhase('writing');
+  const companyName = prettyName(domain);
+  const grounded = !error && Array.isArray(atoms) && atoms.length >= 4;
+  const content = grounded
+    ? await generateProductPitch(companyName, s, enrichmentFromAtoms(summary, atoms))
+    : buildStaticPitch(companyName, s);
+
+  onPhase('building');
+  // Reuse the product's generated hero; regenerate once only if it is missing.
+  let heroImg = null;
+  const solRow = await db.getPage('sol_' + product);
+  const m = solRow && solRow.html && solRow.html.match(wcaHero);
+  if (m) heroImg = m[1];
+  else if (s.heroPrompt) heroImg = (await runwareImage(s.heroPrompt, 'wide')).dataUri;
+
+  const pageTitle = `Why ${s.name} for ${content.company || companyName} | NYN Impact`;
+  const html = renderSolution(product, { prefix: PREFIX, heroImg, custom: content, leadSlug: pageSlug, pageTitle });
+  const stored = { ...content, _wca: { product, domain, grounded } };
+  await db.savePage({ slug: pageSlug, company: content.company || companyName, domain,
+    content: stored, html, status: 'ready' });
+
+  // Visitor asked to be emailed the link: store it as a lead against this page
+  // so it lands in /admin/leads with full attribution.
+  if (email) await db.saveLead(pageSlug, email, null, null).catch(() => {});
+
+  return { status: 'built', slug: pageSlug, url: `/${product}/1/${pageSlug}`,
+    atoms: atoms ? atoms.length : 0, grounded };
+}
+
 // Re-render every stored page with the CURRENT template, from its saved
 // content. No scrape, no LLM, no cost: this is how a design or attribution
 // change rolls out across every page.
@@ -133,8 +180,16 @@ async function rerenderAll() {
     let html;
     if (r.content._solution) {
       const prev = r.html || '';
-      const m = prev.match(/src="(data:image\/webp;base64,[^"]+)"/); // keep the generated hero
+      const m = prev.match(wcaHero); // keep the generated hero
       html = renderSolution(r.content._solution, { prefix: PREFIX, heroImg: m ? m[1] : null });
+    } else if (r.content._wca) {
+      const prev = r.html || '';
+      const m = prev.match(wcaHero);
+      const { _wca, ...custom } = r.content;
+      const sol = SOLUTIONS[_wca.product];
+      if (!sol) { skipped++; continue; } // product retired; keep stored html as-is
+      html = renderSolution(_wca.product, { prefix: PREFIX, heroImg: m ? m[1] : null,
+        custom, leadSlug: r.slug, pageTitle: `Why ${sol.name} for ${r.company} | NYN Impact` });
     } else {
       html = renderPage(r.content, { slug: r.slug, prefix: PREFIX, base_url: PUB });
     }
@@ -146,4 +201,4 @@ async function rerenderAll() {
   return { rerendered: done, skipped, total: rows.length };
 }
 
-module.exports = { tdeRecruitAtoms, buildPartnerPage, runwareImage, buildSolutionPage, rerenderAll };
+module.exports = { tdeRecruitAtoms, buildPartnerPage, runwareImage, buildSolutionPage, buildWcaPage, rerenderAll };
