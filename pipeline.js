@@ -122,4 +122,28 @@ async function buildSolutionPage(product) {
   return { status: 'built', product, slug: pageSlug, url: `${PUB}${PREFIX}/s/${product}`, image: im.dataUri ? 'generated' : ('FAILED: ' + im.error) };
 }
 
-module.exports = { tdeRecruitAtoms, buildPartnerPage, runwareImage, buildSolutionPage };
+// Re-render every stored page with the CURRENT template, from its saved
+// content. No scrape, no LLM, no cost: this is how a design or attribution
+// change rolls out across every page.
+async function rerenderAll() {
+  const rows = await db.getAllPages();
+  let done = 0, skipped = 0;
+  for (const r of rows) {
+    if (!r.content) { skipped++; continue; }
+    let html;
+    if (r.content._solution) {
+      const prev = r.html || '';
+      const m = prev.match(/src="(data:image\/webp;base64,[^"]+)"/); // keep the generated hero
+      html = renderSolution(r.content._solution, { prefix: PREFIX, heroImg: m ? m[1] : null });
+    } else {
+      html = renderPage(r.content, { slug: r.slug, prefix: PREFIX, base_url: PUB });
+    }
+    if (!html) { skipped++; continue; }
+    await db.savePage({ slug: r.slug, company: r.company, domain: r.domain, contact_name: r.contact_name,
+      contact_email: r.contact_email, content: r.content, html, status: r.status || 'ready' });
+    done++;
+  }
+  return { rerendered: done, skipped, total: rows.length };
+}
+
+module.exports = { tdeRecruitAtoms, buildPartnerPage, runwareImage, buildSolutionPage, rerenderAll };

@@ -271,7 +271,17 @@ async function getStats() {
     .sort((a, b) => (b.lead_count - a.lead_count) || (b.open_count - a.open_count));
 }
 
+// Every stored page with its content, for bulk re-render.
+async function getAllPages() {
+  if (USE_PG) {
+    const { rows } = await pool.query(
+      'SELECT slug, company, domain, contact_name, contact_email, content, html, status FROM partner_pages');
+    return rows;
+  }
+  return Object.values(readJson(PAGES_FILE, {}));
+}
+
 module.exports = {
-  initDb, getPage, findByCompany, savePage, insertNewPage,
+  initDb, getPage, getAllPages, findByCompany, savePage, insertNewPage,
   recordVisit, saveLead, getLeads, getStats, USE_PG
 };

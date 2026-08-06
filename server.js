@@ -125,6 +125,13 @@ app.post('/admin/generate/batch', async (req, res) => {
   })().catch(e => { job.status = 'error'; job.error = e.message; });
 });
 
+// Re-render every stored page with the current template (no scrape, no LLM).
+app.post('/admin/rerender', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  try { res.json(await pipeline.rerenderAll()); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 app.get('/admin/generate/status', (req, res) => {
   if (!requireAdmin(req, res)) return;
   const job = jobs.get(req.query.jobId);
