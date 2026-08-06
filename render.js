@@ -253,7 +253,7 @@ function renderPage(content, meta = {}) {
   <div class="hero-bg"><img src="${escapeHtml(heroImg)}" alt="The ransomware threat MSPs protect their clients from" loading="eager"></div>
   <div class="orb"></div>
   <div class="wrap">
-    <div class="reveal in"><span class="eyebrow"><span class="dot"></span>An introduction worth making</span></div>
+    <div class="reveal in"><span class="eyebrow"><span class="dot"></span>Recommended for ${escapeHtml(company)}</span></div>
     <h1 class="reveal in">${escapeHtml(hero.headline || `${company}, turn security into your next recurring revenue line`)}</h1>
     <p class="sub reveal in">${escapeHtml(hero.subhead || `${BRAND.name} helps MSPs stand up new managed-security revenue fast, resold under your own brand.`)}</p>
     <div class="cta-row reveal in"><a class="btn btn-primary" href="${escapeHtml(heroHref)}">${escapeHtml(ctaLabel)}</a><a class="btn btn-ghost" href="#stack">See the stack</a></div>
