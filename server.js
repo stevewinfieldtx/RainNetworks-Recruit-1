@@ -125,6 +125,25 @@ app.post('/admin/generate/batch', async (req, res) => {
   })().catch(e => { job.status = 'error'; job.error = e.message; });
 });
 
+// Build every product page (generates each hero image). Background job.
+app.post('/admin/generate/solutions', async (req, res) => {
+  if (!requireAdmin(req, res)) return;
+  const { SOLUTIONS } = require('./render_solution');
+  const list = Object.keys(SOLUTIONS);
+  const jobId = crypto.randomUUID().slice(0, 8);
+  const job = { id: jobId, total: list.length, done: 0, built: 0, status: 'running', results: [] };
+  jobs.set(jobId, job);
+  res.json({ jobId, total: job.total, status: 'running' });
+  (async () => {
+    for (const p of list) {
+      try { const r = await pipeline.buildSolutionPage(p); job.built++; job.results.push(r); }
+      catch (e) { job.results.push({ product: p, status: 'error', reason: e.message }); }
+      job.done++;
+    }
+    job.status = 'done';
+  })().catch(e => { job.status = 'error'; job.error = e.message; });
+});
+
 // Re-render every stored page with the current template (no scrape, no LLM).
 app.post('/admin/rerender', async (req, res) => {
   if (!requireAdmin(req, res)) return;
