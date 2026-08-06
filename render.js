@@ -17,6 +17,17 @@ const PUBLISHER = {
   site: process.env.PUBLISHER_URL || 'https://nynimpact.com',
 };
 
+// Product name -> its generic product page slug (served at <prefix>/s/<slug>).
+const PRODUCT_SLUG = {
+  'guardz': 'guardz', 'macrium': 'macrium', 'ninjio': 'ninjio', 'bitdefender': 'bitdefender',
+  'eset': 'eset', 'heimdal': 'heimdal', 'proofpoint': 'proofpoint', 'pulseway': 'pulseway',
+  'redstor': 'redstor', 'trustifi': 'trustifi', 'vipre': 'vipre',
+};
+const productHref = (prefix, name) => {
+  const k = PRODUCT_SLUG[String(name || '').trim().toLowerCase()];
+  return k ? `${prefix}/s/${k}` : null;
+};
+
 const BRAND = {
   name: 'Rain Networks', tagline: 'Value-added distribution for MSPs',
   logo: '/rain-logo.png', heroImg: '/hero-threat.webp', boardImg: '/backup-board.webp',
@@ -160,6 +171,12 @@ text-shadow:0 8px 40px rgba(0,0,0,.35)}
 .caseimg img{width:100%;height:100%;object-fit:cover}
 .caseimg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(7,11,22,.5))}
 
+/* product links (chips + layer cards become anchors) */
+a.chip,a.layer{text-decoration:none;color:inherit;display:block}
+a.chip:hover b,a.layer:hover h3{color:var(--brand2)}
+.layer .more{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:13.5px;font-weight:700;color:var(--brand2);letter-spacing:.01em}
+.layer .more::after{content:"\\2192";transition:transform .18s}
+a.layer:hover .more::after{transform:translateX(4px)}
 /* arsenal */
 .arsenal{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:34px}
 @media(max-width:820px){.arsenal{grid-template-columns:repeat(2,1fr)}}
@@ -278,7 +295,8 @@ function renderPage(content, meta = {}) {
   <span class="eyebrow"><span class="dot"></span>The stack</span>
   <h2 class="h2 reveal">One stack, three layers of defense</h2>
   <p class="lead reveal">${escapeHtml(did.intro || 'This is how attacks unfold: trick a person, land on a device, then go after the backups. Adopt all three, or start with the one gap you have.')}</p>
-  <div class="layers">${products.map((p, i) => `<div class="layer reveal"><div class="num">0${i + 1}</div><div class="lic">${licons[i] || ICON.prevent}</div><div class="ltag">${escapeHtml(p.layer)}</div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.for_you)}</p></div>`).join('')}</div>
+  <div class="layers">${products.map((p, i) => { const href = productHref(prefix, p.name); const tag = href ? 'a' : 'div';
+    return `<${tag} class="layer reveal"${href ? ` href="${escapeHtml(href)}"` : ''}><div class="num">0${i + 1}</div><div class="lic">${licons[i] || ICON.prevent}</div><div class="ltag">${escapeHtml(p.layer)}</div><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.for_you)}</p>${href ? '<span class="more">Read more</span>' : ''}</${tag}>`; }).join('')}</div>
   <div class="flexnote reveal"><span class="fic">${ICON.layers}</span><div class="ft"><b>Not all or nothing.</b> Each of these stands on its own. Keep the tools your clients already rely on and add just one, or swap a single layer. Plenty of partners keep their current endpoint security and start with Macrium and NINJIO.</div></div>
 </div></section>
 
@@ -303,8 +321,10 @@ function renderPage(content, meta = {}) {
   <h2 class="h2 reveal">More than three when you are ready</h2>
   <p class="lead reveal">Start with the three that fit you today. Rain distributes a full security catalog you can grow into, all through one relationship.</p>
   <div class="arsenal">
-    ${feat.map(f => `<div class="chip feat reveal"><b>${escapeHtml(f.name)}</b><span>${escapeHtml(f.tag)} &middot; featured</span></div>`).join('')}
-    ${BRAND.catalog.map(x => `<div class="chip reveal"><b>${escapeHtml(x.name)}</b><span>${escapeHtml(x.cat)}</span></div>`).join('')}
+    ${feat.map(f => { const href = productHref(prefix, f.name);
+      return `<${href ? 'a' : 'div'} class="chip feat reveal"${href ? ` href="${escapeHtml(href)}"` : ''}><b>${escapeHtml(f.name)}</b><span>${escapeHtml(f.tag)}${href ? ' &middot; read more' : ''}</span></${href ? 'a' : 'div'}>`; }).join('')}
+    ${BRAND.catalog.map(x => { const href = productHref(prefix, x.name);
+      return `<${href ? 'a' : 'div'} class="chip reveal"${href ? ` href="${escapeHtml(href)}"` : ''}><b>${escapeHtml(x.name)}</b><span>${escapeHtml(x.cat)}</span></${href ? 'a' : 'div'}>`; }).join('')}
   </div>
 </div></section>
 
