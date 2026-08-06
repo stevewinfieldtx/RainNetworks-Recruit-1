@@ -1,0 +1,167 @@
+{
+  "tru technical partners": {
+    "company": "Tru Technical Partners",
+    "hero": {
+      "headline": "Tru Technical Partners, you have protected Bay Area SMBs since 1993. Rain Networks turns that trust into a security practice.",
+      "subhead": "You already run monitoring, backup, and awareness training for legal, finance, healthcare, and DOD manufacturers across Silicon Valley. Rain Networks fills the three gaps regulated clients now demand, resold under Tru Tech, at the SMB price your brand is built on."
+    },
+    "why_rain": {
+      "para": "Your whole promise is enterprise-grade IT and cybersecurity without the enterprise price tag. Rain Networks is how you keep that promise as threats outrun traditional antivirus. As a value-added distributor near Seattle, Rain hands you a curated stack plus enablement and flexible licensing, so your DOD manufacturers move toward CMMC-ready controls and your law and finance clients get audit-ready security, without you standing up a SOC.",
+      "bullets": [
+        "One distributor for your endpoint, recovery, and training layers, not five vendor contracts",
+        "Higher-margin recurring services you resell under the Tru Tech brand",
+        "CMMC and HIPAA aligned controls your regulated Bay Area clients are already asking for",
+        "Enablement and training from Rain, so your team sells it without becoming a SOC"
+      ]
+    },
+    "defense_in_depth": {
+      "intro": "This is how modern attacks unfold across your 250-plus clients: trick a person, land on a device, then go after the backups. Run all three together, or keep the tools you have and add just the layer you are missing. Plenty of partners keep their endpoint security and start with Macrium and NINJIO.",
+      "products": [
+        {
+          "name": "NINJIO",
+          "layer": "Prevent / human layer",
+          "for_you": "Your own blog says it plainly: training once a year is not working and employees are falling for far more phishing. NINJIO replaces the annual checkbox with short, story-based training you resell under Tru Tech, with predictable per-seat margin across every client you support."
+        },
+        {
+          "name": "Guardz",
+          "layer": "Detect and respond",
+          "for_you": "You run monitoring with Trend Micro and Meraki today. Guardz adds the AI-driven endpoint, identity, email, and cloud detection that traditional antivirus misses, in one multi-tenant console, with ROI reports your Bay Area SMBs actually read and a strong commission structure."
+        },
+        {
+          "name": "Macrium",
+          "layer": "Recover",
+          "for_you": "You back up with Veeam, but ransomware now encrypts the backups first. Macrium adds immutable, ransomware-resistant images and rapid bare-metal recovery to dissimilar hardware, so the words we would have lost everything never apply to a Tru Tech client."
+        }
+      ]
+    },
+    "roi": {
+      "headline": "What it does for your book of business",
+      "para": "Each layer is a billable, recurring service you mark up. Together they turn your award-winning security reputation into three new revenue lines and give you a straight answer when a DOD or healthcare client asks what you do beyond antivirus.",
+      "stats": [
+        { "value": "3", "label": "New recurring services under the Tru Tech brand" },
+        { "value": "250+", "label": "Clients you can roll this out across" },
+        { "value": "1 console", "label": "Multi-tenant detection instead of tool sprawl" }
+      ]
+    },
+    "social_proof": {
+      "para": "Rain Networks is a Seattle-area value-added distributor that helps MSPs like Tru Technical identify, deploy, and scale best-in-class security. You keep the client relationship and the brand. Rain handles the distribution and enablement behind it.",
+      "logos": []
+    },
+    "cta": {
+      "headline": "See the stack and the margins for Tru Technical",
+      "subhead": "Leave your email and I will send the Silicon Valley playbook: the three products, your margin on each, and how onboarding works. No calendars, no obligation.",
+      "url": "https://rainnetworks.com/",
+      "label": "Send me the partner details"
+    }
+  },
+  "plummer slade, inc.": {
+    "company": "Plummer Slade",
+    "hero": {
+      "headline": "Plummer Slade, the Allegheny County Bar's endorsed IT firm. Rain Networks helps you give Pittsburgh law firms security worthy of privilege.",
+      "subhead": "Since 1988 you have been Western Pennsylvania law firms' single source for IT. Client confidentiality and the ACBA endorsement set a high bar. Rain Networks fills the three gaps: device-level threat detection, extortion-proof backups for Worldox and NetDocuments, and phishing training beyond the awareness tools you already trust."
+    },
+    "why_rain": {
+      "para": "You set the standard for downtown Pittsburgh law firms and promise to be within minutes of restoring their productivity. Rain Networks helps you extend that promise to the security layer. As a value-added distributor, Rain gives you a curated stack plus enablement and flexible licensing, so a firm handling privileged matters gets endpoint detection, hardened recovery, and continuous training, all under the Plummer Slade name.",
+      "bullets": [
+        "One distributor for detection, recovery, and training, sold through your single-source model",
+        "Recurring security revenue from the law firms that already trust you",
+        "Controls that fit legal confidentiality and client-data protection duties",
+        "Rain handles enablement, so you add security services without new headcount"
+      ]
+    },
+    "defense_in_depth": {
+      "intro": "This is how law firms actually get breached: a convincing email, a compromised device, then encryption of the document management system. Layer all three, or keep your current tools and add just the one gap you have.",
+      "products": [
+        {
+          "name": "NINJIO",
+          "layer": "Prevent / human layer",
+          "for_you": "You already believe in awareness training. NINJIO gives you a short, story-based program to resell under Plummer Slade, tuned to how attackers target law firms, their staff, and their trust accounts, with predictable per-seat margin."
+        },
+        {
+          "name": "Guardz",
+          "layer": "Detect and respond",
+          "for_you": "Managed security and compliancy is already on your page, but law firms are hit at the endpoint. Guardz adds AI detection across devices, identity, email, and Microsoft 365 in one console, with the reporting a firm needs to show its clients it is protected."
+        },
+        {
+          "name": "Macrium",
+          "layer": "Recover",
+          "for_you": "Extortion crews encrypt Worldox and NetDocuments first. Macrium adds immutable, ransomware-resistant images and rapid recovery, so a firm stays billable within the minutes your downtown proximity already promises."
+        }
+      ]
+    },
+    "roi": {
+      "headline": "What it does for your firm-focused practice",
+      "para": "Each layer is a recurring service you mark up. Together they let you walk into any Allegheny County firm and offer detection, recovery, and training as one package that protects privilege and your reputation as their single source.",
+      "stats": [
+        { "value": "3", "label": "New recurring services under the Plummer Slade name" },
+        { "value": "Since 1988", "label": "Trust you can extend into security" },
+        { "value": "1 console", "label": "Detection across every client, one pane" }
+      ]
+    },
+    "social_proof": {
+      "para": "Rain Networks is a Seattle-area value-added distributor that helps MSPs like Plummer Slade identify, deploy, and scale best-in-class security. You keep the firm relationship and the brand. Rain handles distribution and enablement.",
+      "logos": []
+    },
+    "cta": {
+      "headline": "See the stack and the margins for Plummer Slade",
+      "subhead": "Leave your email and I will send the legal-vertical playbook: the three products, your margin on each, and how onboarding works. No calendars, no obligation.",
+      "url": "https://rainnetworks.com/",
+      "label": "Send me the partner details"
+    }
+  },
+  "atlanta i.t. service": {
+    "company": "Atlanta I.T. Service",
+    "hero": {
+      "headline": "Atlanta I.T. Service, your dental clients live and die by HIPAA. Rain Networks makes their security your recurring revenue.",
+      "subhead": "You deploy and maintain large fleets of PCs and servers across Atlanta, including dental practices that must protect patient records. Rain Networks adds what network protection alone misses: AI endpoint detection beyond McAfee, validated ransomware-proof backups next to your Data Vault, and staff phishing training, all resold under your name."
+    },
+    "why_rain": {
+      "para": "Your clients count on you for the most comprehensive, efficient service possible. Rain Networks helps you extend that to security as threats outgrow traditional antivirus. As a value-added distributor, Rain gives you a curated stack plus enablement and flexible licensing, so your dental and mid-market clients get HIPAA-aligned protection without you building a security team.",
+      "bullets": [
+        "One distributor for detection, recovery, and training across your deployments",
+        "New recurring revenue on top of your maintenance agreements",
+        "HIPAA-aligned controls your dental practices need at audit time",
+        "Rain provides enablement, so your techs sell security without becoming analysts"
+      ]
+    },
+    "defense_in_depth": {
+      "intro": "This is how breaches happen in the offices you deploy and maintain: a staff member clicks, a workstation is compromised, then the backups are targeted. Take all three, or keep what you run today and add a single layer.",
+      "products": [
+        {
+          "name": "NINJIO",
+          "layer": "Prevent / human layer",
+          "for_you": "Your own guides show users clicking bad updates and patches. NINJIO turns that human risk into a billable, ongoing training service for every dental front desk and back office you support, with predictable per-seat margin."
+        },
+        {
+          "name": "Guardz",
+          "layer": "Detect and respond",
+          "for_you": "You run McAfee and network protection today. Guardz adds AI-driven detection across endpoints, identity, email, and cloud in one multi-tenant console, with the HIPAA-friendly reporting a dental office needs when an auditor asks."
+        },
+        {
+          "name": "Macrium",
+          "layer": "Recover",
+          "for_you": "Your Data Vault backs data up. Macrium proves it can come back: immutable, ransomware-resistant images and rapid recovery to dissimilar hardware, so a practice is never a day without its charts."
+        }
+      ]
+    },
+    "roi": {
+      "headline": "What it does for your deployment business",
+      "para": "Each layer is a recurring service you mark up on top of the hardware and maintenance you already sell. Together they turn every deployment into a security relationship your competitors cannot easily unseat.",
+      "stats": [
+        { "value": "3", "label": "New recurring services on top of maintenance" },
+        { "value": "HIPAA", "label": "Aligned controls for your dental clients" },
+        { "value": "1 console", "label": "Detection across every office you manage" }
+      ]
+    },
+    "social_proof": {
+      "para": "Rain Networks is a Seattle-area value-added distributor that helps MSPs like Atlanta I.T. Service identify, deploy, and scale best-in-class security. You keep the client and the brand. Rain handles distribution and enablement.",
+      "logos": []
+    },
+    "cta": {
+      "headline": "See the stack and the margins for Atlanta I.T. Service",
+      "subhead": "Leave your email and I will send the dental and mid-market playbook: the three products, your margin on each, and how onboarding works. No calendars, no obligation.",
+      "url": "https://rainnetworks.com/",
+      "label": "Send me the partner details"
+    }
+  }
+}
