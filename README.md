@@ -31,6 +31,7 @@ OpenRouter call patterns are adapted from the `HowDoISay` project.
 | `llm.js` | `generatePageContent()` and `generateOutreachEmail()` (OpenRouter, falls back to static copy) |
 | `render.js` | `renderPage()` server-side HTML, `escapeHtml()` |
 | `og.js` | `renderOgPng()`: personalized `og:image` preview card (resvg-js, no headless browser) |
+| `notify.js` | `notifyLead()`: fires a Resend email to you when a partner submits the lead form |
 | `db.js` | Postgres or local JSON file store, `getPage`/`savePage`/`recordVisit`/`getStats` |
 | `slug.js` | `newSlug()` 64-bit URL-safe slug |
 | `env.js` | Tiny `.env` loader (no dependency) |
@@ -68,7 +69,8 @@ Produce it in an environment that has web-search / prospecting tools, then run
 1. New service from this repo. Add a Railway Postgres plugin.
 2. Set env vars: `DATABASE_URL` (from the plugin), `OPENROUTER_API_KEY`,
    `OPENROUTER_MODEL_ID`, `BASE_URL` (the public URL), `RAINPARTNERS_ADMIN_KEY`, `IP_SALT`,
-   `DEFAULT_CTA_URL`.
+   `DEFAULT_CTA_URL`, and optionally `RESEND_API_KEY` / `RESEND_FROM_EMAIL` /
+   `LEAD_NOTIFY_EMAIL` for lead-form email notifications.
 3. Start command: `npm start`. Tables are created on boot.
 
 ## Tracking
@@ -78,3 +80,6 @@ Produce it in an environment that has web-search / prospecting tools, then run
   Treat page views as ground truth (mail clients pre-fetch images).
 - `cta_click`: logged by `/go/:slug` before redirecting to the booking link.
 - `GET /admin/stats?key=RAINPARTNERS_ADMIN_KEY` returns per-partner open counts.
+- Lead form submissions (`POST /p/l/:slug`) always save to the `leads` table, and
+  additionally fire a Resend email to `LEAD_NOTIFY_EMAIL` when Resend is configured
+  (see Deploy). Notification failures are logged but never block saving the lead.

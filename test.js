@@ -4,6 +4,7 @@ const { newSlug } = require('./slug');
 const { renderPage, escapeHtml } = require('./render');
 const { buildStaticContent } = require('./llm');
 const { renderOgPng, wrapLines } = require('./og');
+const { notifyLead } = require('./notify');
 
 let passed = 0;
 function t(name, fn) { fn(); passed++; console.log(`  ok  ${name}`); }
@@ -87,4 +88,15 @@ t('og.renderOgPng: produces a valid, correctly sized PNG', () => {
   assert.deepStrictEqual(png.subarray(0, 8), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), 'missing PNG signature');
 });
 
-console.log(`\n${passed} tests passed.`);
+// --- notify (async: no network call when Resend env vars are unset) -------
+delete process.env.RESEND_API_KEY; delete process.env.LEAD_NOTIFY_EMAIL; delete process.env.RESEND_FROM_EMAIL;
+notifyLead({ company: 'Acme', email: 'a@example.com', phone: null, slug: 'abc' })
+  .then(() => {
+    passed++;
+    console.log('  ok  notify.notifyLead: no-ops when Resend env vars are unset');
+    console.log(`\n${passed} tests passed.`);
+  })
+  .catch(err => {
+    console.error('  FAIL notify.notifyLead:', err.message);
+    process.exitCode = 1;
+  });
