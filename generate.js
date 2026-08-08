@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 require('./env')();
 
-const { generatePageContent } = require('./llm');
+const { generatePageContent, generateOutreachEmail } = require('./llm');
 const { fetchSiteText } = require('./site');
 const { renderPage } = require('./render');
 const db = require('./db');
@@ -114,9 +114,14 @@ async function main() {
       content = await generatePageContent(company, enrichment);
     }
 
+    const first = (p.contact_name || '').split(' ')[0] || '';
+
     if (dry) {
       console.log(`\n===== ${company} =====`);
       console.log(JSON.stringify(content, null, 2));
+      const previewUrl = `${baseUrl}/p/<slug>`;
+      const email = await generateOutreachEmail(company, content, previewUrl, first);
+      console.log(`\n----- outreach email -----\nSubject: ${email.subject}\n\n${email.body}`);
       return null;
     }
 
@@ -132,15 +137,15 @@ async function main() {
       contact_email: p.contact_email, enrichment, content, html, status: 'ready' });
 
     const url = `${baseUrl}/p/${finalSlug}`;
-    const first = (p.contact_name || '').split(' ')[0] || '';
+    const email = await generateOutreachEmail(company, content, url, first);
     console.log(`ok  ${company}  ->  ${url}`);
-    return `${csvField(company)},${csvField(p.contact_email || '')},${csvField(first)},${url}`;
+    return `${csvField(company)},${csvField(p.contact_email || '')},${csvField(first)},${csvField(url)},${csvField(email.subject)},${csvField(email.body)}`;
   }
 
   const rows = await pMap(partners, concurrency, buildOne);
 
   if (!dry) {
-    const campaign = ['company,contact_email,first_name,url', ...rows.filter(Boolean)];
+    const campaign = ['company,contact_email,first_name,url,email_subject,email_body', ...rows.filter(Boolean)];
     fs.writeFileSync(path.join(__dirname, 'campaign.csv'), campaign.join('\n') + '\n');
     console.log(`\nWrote campaign.csv (${campaign.length - 1} partners). Base URL: ${baseUrl}`);
     console.log('Store:', db.USE_PG ? 'Postgres' : 'local ./data files');

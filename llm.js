@@ -236,4 +236,102 @@ async function generateProductPitch(companyName, solution, enrichment = {}) {
   }
 }
 
-module.exports = { generatePageContent, buildStaticContent, generateProductPitch, buildStaticPitch };
+// --- Outreach email (pairs with the personalized landing page) -------------
+//
+// The email is the thing that actually lands in an inbox; the landing page is
+// what it links to. Guardz leads (it is the strongest hook: detection is the
+// gap MSPs feel first), but the email must also name Macrium and NINJIO so the
+// reader is not surprised to find three offerings when they click through.
+
+function findProduct(content, name) {
+  const list = (content && content.defense_in_depth && content.defense_in_depth.products) || [];
+  return list.find(p => p.name === name);
+}
+
+// Deterministic, no-network fallback. Reuses the already-personalized Guardz
+// "for_you" line from the page content as the hook, so the email and the page
+// never disagree about why Guardz fits this MSP.
+function buildStaticEmail(companyName, content, opts = {}) {
+  const url = opts.url || DEFAULT_CTA_URL();
+  const first = (opts.contactFirstName || '').trim();
+  const guardz = findProduct(content, 'Guardz');
+  const hook = (guardz && guardz.for_you) ||
+    `Guardz adds AI-driven detection across endpoints, identity, email, and cloud in one multi-tenant console, with a strong reseller margin.`;
+
+  const lines = [
+    first ? `Hi ${first},` : `Hi there,`,
+    '',
+    hook,
+    '',
+    `That is the lead, but Rain Networks backs it with two more billable layers: Macrium for ransomware-resistant backup and fast recovery, and NINJIO for security-awareness training your clients will actually finish. All three stand on their own, so ${companyName} can start with Guardz alone or add whichever layer you are missing.`
+      .replace('${companyName}', companyName),
+    '',
+    `I put together a short page with specifics on all three, and what each looks like resold under your brand: ${url}`,
+    '',
+    `Worth five minutes?`,
+  ];
+  return { subject: `${companyName}: Guardz, plus backup and training behind it`, body: lines.join('\n') };
+}
+
+function emailSystemPrompt() {
+  return `You write a short, personal cold outreach EMAIL (not a landing page) that gets an MSP owner to click through to a personalized partner page about Rain Networks, a Seattle-area value-added distributor.
+
+You will be given the JSON content of that landing page, already personalized to this MSP. Use it as your ONLY source of facts about the company and the products. Do not invent anything beyond what is there.
+
+STRUCTURE:
+- Open with 1 to 2 sentences that hook on Guardz (detect and respond) specifically, using the company-specific angle already written in defense_in_depth.products for the "Guardz" entry.
+- Then 1 to 2 sentences that explicitly name and briefly describe the other two products, Macrium (recover) and NINJIO (prevent / human layer), so the reader is not surprised to see three offerings when they click through. Say plainly that the three are independent and they can start with just one.
+- Close with one line pointing to the personalized page (use the exact URL given, verbatim) and a short, low-pressure sign-off question.
+
+HARD RULES:
+- The body MUST mention "Guardz", "Macrium", and "NINJIO" by name, each at least once.
+- Plain text email, not HTML. No subject-line header inside the body.
+- Under 140 words total in the body.
+- Do not use em dashes or en dashes anywhere. Use commas, colons, periods, or parentheses.
+- Do not mention booking a call, calendars, or scheduling. The only ask is to click the link or reply.
+- Return ONLY valid JSON, no markdown fences, exactly this shape:
+{"subject":"max 70 chars, names the company or the hook","body":"the full email body as plain text, paragraphs separated by a single blank line"}`;
+}
+
+// Enforce the hard rule that all three products are named, strip dashes, and
+// make sure the link survived. Falls back to the static email on any miss.
+function validateEmail(parsed, url) {
+  const clean = (v, max) => String(v || '').replace(/[—–]/g, ', ').trim().slice(0, max);
+  if (!parsed || typeof parsed !== 'object') return null;
+  const subject = clean(parsed.subject, 78);
+  let body = clean(parsed.body, 2000);
+  if (!subject || !body) return null;
+  const lower = body.toLowerCase();
+  if (!lower.includes('guardz') || !lower.includes('macrium') || !lower.includes('ninjio')) return null;
+  if (!body.includes(url)) body += `\n\n${url}`;
+  return { subject, body };
+}
+
+// content = the page content already produced for this partner (so the email
+// and the landing page it links to always tell the same story). url = the
+// partner's personalized page link.
+async function generateOutreachEmail(companyName, content, url, contactFirstName) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const modelId = process.env.OPENROUTER_MODEL_ID;
+  const opts = { url, contactFirstName };
+  if (!apiKey || !modelId) return buildStaticEmail(companyName, content, opts);
+
+  const sys = emailSystemPrompt();
+  const user = `Company: ${companyName}\nPersonalized landing page URL (use this exact URL): ${url}\n\n` +
+    `LANDING PAGE CONTENT (already personalized, your only source of facts):\n${JSON.stringify(content, null, 2)}`;
+
+  try {
+    let parsed;
+    try { parsed = await callOpenRouter(apiKey, modelId, sys, user, true); }
+    catch { parsed = await callOpenRouter(apiKey, modelId, sys, user, false); }
+    return validateEmail(parsed, url) || buildStaticEmail(companyName, content, opts);
+  } catch (err) {
+    console.error(`LLM: email fallback for "${companyName}": ${err.message}`);
+    return buildStaticEmail(companyName, content, opts);
+  }
+}
+
+module.exports = {
+  generatePageContent, buildStaticContent, generateProductPitch, buildStaticPitch,
+  generateOutreachEmail, buildStaticEmail,
+};
