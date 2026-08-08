@@ -9,12 +9,12 @@ function escapeHtml(v) {
 }
 
 // The SUBJECT of the recommendation (who we are pointing the MSP toward).
-// The PUBLISHER of the page is NYN Impact, an independent advisor: every lead
-// and introduction comes to NYN Impact, never straight to the distributor.
+// The PUBLISHER of the page is Rain Networks: every lead and introduction
+// comes to Rain Networks directly.
 const PUBLISHER = {
-  name: 'NYN Impact',
-  role: 'Independent MSP solution reviews and introductions',
-  site: process.env.PUBLISHER_URL || 'https://nynimpact.com',
+  name: 'Rain Networks',
+  role: 'Value-added distribution for MSPs',
+  site: process.env.PUBLISHER_URL || 'https://rainnetworks.com',
 };
 
 // Product name -> its generic product page slug (served at <prefix>/s/<slug>).
@@ -251,6 +251,10 @@ function renderPage(content, meta = {}) {
   const title = `${company} + ${BRAND.name} Partnership`;
   const desc = hero.subhead || `Why partnering with ${BRAND.name} fits ${company}.`;
   const bicons = [ICON.bolt, ICON.handshake, ICON.layers, ICON.prevent];
+  // Personalized link-unfurl thumbnail (Slack, LinkedIn, some webmail): needs
+  // an absolute URL, so only emit it when we have both a base_url and a slug.
+  const ogImage = (meta.base_url && meta.slug)
+    ? `${meta.base_url.replace(/\/$/, '')}${prefix}/og/${encodeURIComponent(meta.slug)}.png` : null;
 
   return `<!doctype html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -258,6 +262,7 @@ function renderPage(content, meta = {}) {
 <meta name="description" content="${escapeHtml(desc)}">
 <meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(desc)}">
 <meta property="og:type" content="website"><meta name="theme-color" content="#070b16"><meta name="robots" content="noindex">
+${ogImage ? `<meta property="og:image" content="${escapeHtml(ogImage)}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image">` : ''}
 <style>${fontCss(meta)}${STYLE}</style></head>
 <body id="top"><div class="bgfx"></div><div class="grain"></div>
 

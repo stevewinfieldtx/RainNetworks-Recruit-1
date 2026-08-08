@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const db = require('./db');
 const pipeline = require('./pipeline');
 const { renderNotFound, renderThanks } = require('./render');
+const { renderOgPng } = require('./og');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -30,6 +31,22 @@ app.get(`${PREFIX}/:slug`, async (req, res) => {
   db.recordVisit(req.params.slug, 'page_view', req).catch(() => {}); // fire and forget
   res.set('Cache-Control', 'public, max-age=300');
   res.send(row.html);
+});
+
+// --- Open Graph preview card (link-unfurl thumbnail for the email link) ----
+app.get(`${PREFIX}/og/:slug([A-Za-z0-9_-]+).png`, async (req, res) => {
+  const row = await db.getPage(req.params.slug);
+  if (!row) return res.status(404).end();
+  const headline = row.content && row.content.hero && row.content.hero.headline;
+  try {
+    const png = renderOgPng({ company: row.company, headline });
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400, immutable');
+    res.send(png);
+  } catch (err) {
+    console.error('og render:', err.message);
+    res.status(500).end();
+  }
 });
 
 // --- Email open pixel ------------------------------------------------------

@@ -1,4 +1,4 @@
-// Generic PRODUCT landing pages, published by NYN Impact.
+// Generic PRODUCT landing pages, published by Rain Networks.
 //
 // Purpose: tell an MSP "you need this product, here is why it is great." If
 // they want more, they leave an email and it comes to us. Nothing routes the
@@ -13,7 +13,7 @@ function esc(v) {
   return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-const PUBLISHER = { name: 'NYN Impact' };
+const PUBLISHER = { name: 'Rain Networks' };
 
 const I = {
   shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',

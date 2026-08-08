@@ -3,6 +3,7 @@ const assert = require('assert');
 const { newSlug } = require('./slug');
 const { renderPage, escapeHtml } = require('./render');
 const { buildStaticContent } = require('./llm');
+const { renderOgPng, wrapLines } = require('./og');
 
 let passed = 0;
 function t(name, fn) { fn(); passed++; console.log(`  ok  ${name}`); }
@@ -61,6 +62,29 @@ t('buildStaticContent: no em or en dashes in copy', () => {
   const c = buildStaticContent('Summit Networks Group', { industry: 'healthcare', location: 'Denver' });
   const blob = JSON.stringify(c);
   assert.ok(!/[–—]/.test(blob), 'found an en/em dash in generated copy');
+});
+
+// --- og:image (link-unfurl preview) -----------------------------------------
+t('renderPage: emits an absolute og:image only when slug + base_url are known', () => {
+  const c = buildStaticContent('Cascade Managed IT', {});
+  const withBoth = renderPage(c, { slug: 'abc123', prefix: '/p', base_url: 'https://x.example' });
+  assert.ok(withBoth.includes('<meta property="og:image" content="https://x.example/p/og/abc123.png">'),
+    'og:image missing or malformed when slug + base_url are present');
+  const withoutBaseUrl = renderPage(c, { slug: 'abc123' });
+  assert.ok(!withoutBaseUrl.includes('og:image'), 'og:image should not render a relative (broken) URL');
+});
+
+t('og.wrapLines: wraps long text and marks truncation with an ellipsis', () => {
+  const lines = wrapLines('one two three four five six seven eight nine ten eleven twelve', 12, 3);
+  assert.strictEqual(lines.length, 3, 'expected exactly 3 lines');
+  assert.ok(lines[2].endsWith('…'), 'last line should be truncated with an ellipsis');
+  assert.ok(lines.every(l => l.length <= 13), 'a line exceeded the max width by more than the ellipsis');
+});
+
+t('og.renderOgPng: produces a valid, correctly sized PNG', () => {
+  const png = renderOgPng({ company: 'Cascade Managed IT', headline: 'Turn security into recurring revenue' });
+  assert.ok(Buffer.isBuffer(png), 'expected a Buffer');
+  assert.deepStrictEqual(png.subarray(0, 8), Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), 'missing PNG signature');
 });
 
 console.log(`\n${passed} tests passed.`);

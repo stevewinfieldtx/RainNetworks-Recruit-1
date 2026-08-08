@@ -2,12 +2,20 @@
 
 Personalized MSP partner-recruitment landing pages for **Rain Networks**.
 
-Each outreach email carries a unique URL (`/p/<slug>`). Clicking it lands the
-recipient on a page personalized to their MSP, arguing why partnering with Rain
-and adopting **Guardz** (detect and respond), **Macrium** (recover), and
-**NINJIO** (prevent, human layer) is great for their business. Pages are
+Each outreach email leads with **Guardz** (detect and respond) but also names
+**Macrium** (recover) and **NINJIO** (prevent, human layer), and carries a
+unique URL (`/p/<slug>`). Clicking it lands the recipient on a page personalized
+to their MSP, arguing why partnering with Rain and adopting all three is great
+for their business. The email and the page are generated from the same content
+object, so the email never undersells what is actually on the page. Pages are
 pre-generated and cached at send time, so the click serves instantly with no
 model call at request time.
+
+Each page also carries a personalized `og:image`: a branded preview card
+(hero photo, headline, company name) at `/p/og/<slug>.png`, generated on
+request from the stored page content. Wherever the plain-text email link gets
+a rich preview (Slack, LinkedIn, iMessage, some webmail), the recipient sees
+that card instead of a bare URL, without the email itself becoming HTML.
 
 ## Stack
 
@@ -18,10 +26,11 @@ OpenRouter call patterns are adapted from the `HowDoISay` project.
 
 | File | Role |
 |------|------|
-| `server.js` | Routes: `/p/:slug`, `/px/:slug.gif`, `/go/:slug`, `/admin/stats`, static |
+| `server.js` | Routes: `/p/:slug`, `/p/og/:slug.png`, `/px/:slug.gif`, `/go/:slug`, `/admin/stats`, static |
 | `generate.js` | Batch CLI: CSV -> enrich -> content -> HTML -> store + slug -> `campaign.csv` |
-| `llm.js` | `generatePageContent()` (OpenRouter, falls back to static copy) |
+| `llm.js` | `generatePageContent()` and `generateOutreachEmail()` (OpenRouter, falls back to static copy) |
 | `render.js` | `renderPage()` server-side HTML, `escapeHtml()` |
+| `og.js` | `renderOgPng()`: personalized `og:image` preview card (resvg-js, no headless browser) |
 | `db.js` | Postgres or local JSON file store, `getPage`/`savePage`/`recordVisit`/`getStats` |
 | `slug.js` | `newSlug()` 64-bit URL-safe slug |
 | `env.js` | Tiny `.env` loader (no dependency) |
@@ -41,6 +50,10 @@ npm start                 # serve on PORT (default 4000)
 With no `DATABASE_URL`, data persists to `./data/*.json` locally so the
 generator and server share state. With no OpenRouter creds, `generate.js`
 produces strong deterministic (static) copy personalized by company + enrichment.
+
+`campaign.csv` columns: `company,contact_email,first_name,url,email_subject,email_body`.
+`email_subject` and `email_body` are ready to mail-merge as-is: the body leads
+with Guardz, then explicitly names Macrium and NINJIO, then links to `url`.
 
 ## Enrichment
 
