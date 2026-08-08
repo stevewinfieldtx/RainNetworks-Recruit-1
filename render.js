@@ -9,12 +9,12 @@ function escapeHtml(v) {
 }
 
 // The SUBJECT of the recommendation (who we are pointing the MSP toward).
-// The PUBLISHER of the page is NYN Impact, an independent advisor: every lead
-// and introduction comes to NYN Impact, never straight to the distributor.
+// The PUBLISHER of the page is Rain Networks: every lead and introduction
+// comes to Rain Networks directly.
 const PUBLISHER = {
-  name: 'NYN Impact',
-  role: 'Independent MSP solution reviews and introductions',
-  site: process.env.PUBLISHER_URL || 'https://nynimpact.com',
+  name: 'Rain Networks',
+  role: 'Value-added distribution for MSPs',
+  site: process.env.PUBLISHER_URL || 'https://rainnetworks.com',
 };
 
 // Product name -> its generic product page slug (served at <prefix>/s/<slug>).

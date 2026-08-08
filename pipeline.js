@@ -155,7 +155,7 @@ async function buildWcaPage({ product, domain, slug: pageSlug, email, onPhase = 
   if (m) heroImg = m[1];
   else if (s.heroPrompt) heroImg = (await runwareImage(s.heroPrompt, 'wide')).dataUri;
 
-  const pageTitle = `Why ${s.name} for ${content.company || companyName} | NYN Impact`;
+  const pageTitle = `Why ${s.name} for ${content.company || companyName} | Rain Networks`;
   const html = renderSolution(product, { prefix: PREFIX, heroImg, custom: content, leadSlug: pageSlug, pageTitle });
   const stored = { ...content, _wca: { product, domain, grounded } };
   await db.savePage({ slug: pageSlug, company: content.company || companyName, domain,
@@ -189,7 +189,7 @@ async function rerenderAll() {
       const sol = SOLUTIONS[_wca.product];
       if (!sol) { skipped++; continue; } // product retired; keep stored html as-is
       html = renderSolution(_wca.product, { prefix: PREFIX, heroImg: m ? m[1] : null,
-        custom, leadSlug: r.slug, pageTitle: `Why ${sol.name} for ${r.company} | NYN Impact` });
+        custom, leadSlug: r.slug, pageTitle: `Why ${sol.name} for ${r.company} | Rain Networks` });
     } else {
       html = renderPage(r.content, { slug: r.slug, prefix: PREFIX, base_url: PUB });
     }
