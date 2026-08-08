@@ -6,6 +6,7 @@ const db = require('./db');
 const pipeline = require('./pipeline');
 const { renderNotFound, renderThanks } = require('./render');
 const { renderOgPng } = require('./og');
+const { notifyLead } = require('./notify');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -74,6 +75,7 @@ app.post(`${PREFIX}/l/:slug`, async (req, res) => {
   const page = await db.getPage(slug);
   const company = page ? page.company : null;
   await db.saveLead(slug, email, phone || null, req).catch(err => console.error('lead save:', err.message));
+  notifyLead({ company, email, phone, slug }).catch(err => console.error('lead notify:', err.message));
 
   return wantsJson
     ? res.json({ ok: true, email, phone: phone || null })
