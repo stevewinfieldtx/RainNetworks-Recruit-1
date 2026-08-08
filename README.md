@@ -11,6 +11,12 @@ object, so the email never undersells what is actually on the page. Pages are
 pre-generated and cached at send time, so the click serves instantly with no
 model call at request time.
 
+Each page also carries a personalized `og:image`: a branded preview card
+(hero photo, headline, company name) at `/p/og/<slug>.png`, generated on
+request from the stored page content. Wherever the plain-text email link gets
+a rich preview (Slack, LinkedIn, iMessage, some webmail), the recipient sees
+that card instead of a bare URL, without the email itself becoming HTML.
+
 ## Stack
 
 Node 18+, Express 4, `pg`. No build step. Deploys to Railway. The cache and
@@ -20,10 +26,11 @@ OpenRouter call patterns are adapted from the `HowDoISay` project.
 
 | File | Role |
 |------|------|
-| `server.js` | Routes: `/p/:slug`, `/px/:slug.gif`, `/go/:slug`, `/admin/stats`, static |
+| `server.js` | Routes: `/p/:slug`, `/p/og/:slug.png`, `/px/:slug.gif`, `/go/:slug`, `/admin/stats`, static |
 | `generate.js` | Batch CLI: CSV -> enrich -> content -> HTML -> store + slug -> `campaign.csv` |
 | `llm.js` | `generatePageContent()` and `generateOutreachEmail()` (OpenRouter, falls back to static copy) |
 | `render.js` | `renderPage()` server-side HTML, `escapeHtml()` |
+| `og.js` | `renderOgPng()`: personalized `og:image` preview card (resvg-js, no headless browser) |
 | `db.js` | Postgres or local JSON file store, `getPage`/`savePage`/`recordVisit`/`getStats` |
 | `slug.js` | `newSlug()` 64-bit URL-safe slug |
 | `env.js` | Tiny `.env` loader (no dependency) |

@@ -76,6 +76,7 @@ async function main() {
   const dry = process.argv.includes('--dry');
   const onlyCompany = arg('--company');
   const baseUrl = (arg('--base-url') || process.env.BASE_URL || 'http://localhost:4000').replace(/\/$/, '');
+  const prefix = (process.env.PAGE_PREFIX || '/p').replace(/\/$/, '');
   const noFetch = process.argv.includes('--no-fetch');
   const refresh = process.argv.includes('--refresh');
   const concurrency = Math.max(1, parseInt(arg('--concurrency') || '4', 10));
@@ -119,7 +120,7 @@ async function main() {
     if (dry) {
       console.log(`\n===== ${company} =====`);
       console.log(JSON.stringify(content, null, 2));
-      const previewUrl = `${baseUrl}/p/<slug>`;
+      const previewUrl = `${baseUrl}${prefix}/<slug>`;
       const email = await generateOutreachEmail(company, content, previewUrl, first);
       console.log(`\n----- outreach email -----\nSubject: ${email.subject}\n\n${email.body}`);
       return null;
@@ -132,11 +133,11 @@ async function main() {
       finalSlug = await db.insertNewPage({ company, domain: p.domain, contact_name: p.contact_name,
         contact_email: p.contact_email, enrichment, content, html: null, status: 'ready' });
     }
-    const html = renderPage(content, { slug: finalSlug, base_url: baseUrl });
+    const html = renderPage(content, { slug: finalSlug, prefix, base_url: baseUrl });
     await db.savePage({ slug: finalSlug, company, domain: p.domain, contact_name: p.contact_name,
       contact_email: p.contact_email, enrichment, content, html, status: 'ready' });
 
-    const url = `${baseUrl}/p/${finalSlug}`;
+    const url = `${baseUrl}${prefix}/${finalSlug}`;
     const email = await generateOutreachEmail(company, content, url, first);
     console.log(`ok  ${company}  ->  ${url}`);
     return `${csvField(company)},${csvField(p.contact_email || '')},${csvField(first)},${csvField(url)},${csvField(email.subject)},${csvField(email.body)}`;
